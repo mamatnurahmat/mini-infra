@@ -21,7 +21,7 @@ services:
       my_network:
         ipv4_address: 10.5.0.6
     # volumes:
-    #   - mariadb_data:/var/lib/mysql
+    #   - mariadb_volume:/var/lib/mysql
 
   mariadb:
     image: mariadb:10.6
@@ -35,7 +35,21 @@ services:
       my_network:
         ipv4_address: 10.5.0.3
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mariadb_volume:/var/lib/mysql
+      # - ./DbDummy.sql:/docker-entrypoint-initdb.d/DbDummy.sql  # Menambahkan volume untuk file SQL inisialisasi
+
+  db_seeder:
+    image: mysql:latest
+    volumes:
+      - ./DbDummy.sql:/DbDummy.sql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    entrypoint: [ "bash", "-c", "sleep 10 && mysql --user=root -p'password-rahasia' --host=10.5.0.3 --port=3306 DbDummy < /DbDummy.sql && exit"] 
+    depends_on:
+      - mariadb
+    networks:
+      my_network:
+        ipv4_address: 10.5.0.4
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -45,12 +59,28 @@ services:
       PMA_USER: root
       PMA_PASSWORD: "password-rahasia"
     ports:
-      - "8080:80"      
+      - "8888:80"      
     networks:
       my_network:
         ipv4_address: 10.5.0.5
     depends_on:
       - mariadb
 
+  # python-app:
+  #   build: ./app  
+  #   image: newrahmat/get-py
+  #   restart: always
+  #   working_dir: /app
+  #   # command: python -u main.py
+  #   networks:
+  #     my_network:
+  #       ipv4_address: 10.5.0.7
+  #   depends_on:
+  #     - mariadb
+  #   ports:
+  #     - "5000:5000"
+  #   # volumes:
+  #   #   - ./main.py:/app/main.py
+
 volumes:
-  mariadb_data:
+  mariadb_volume:
