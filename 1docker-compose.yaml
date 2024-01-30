@@ -1,0 +1,112 @@
+version: '3'
+services:
+  server:
+    image: "rancher/k3s:${K3S_VERSION:-latest}"
+    command: 
+    - server
+    tmpfs:
+    - /run
+    - /var/run
+    privileged: true
+    environment:
+    - K3S_TOKEN=secret
+    - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
+    - K3S_KUBECONFIG_MODE=666
+    volumes:
+    - ./registries.yaml:/c/cygwin64/etc/rancher/k3s/registries.yaml
+    - .:/output
+    ports:
+    - 6443:6443
+    # - 8080:8080
+
+  apigw01:
+    image: "rancher/k3s:${K3S_VERSION:-latest}"
+    command:
+    - agent
+    tmpfs:
+    - /run
+    - /var/run
+    privileged: true
+    environment:
+    - K3S_URL=https://server:6443
+    - K3S_TOKEN=secret
+    - K3S_NODE_NAME=front
+    volumes:
+    - ./registries.yaml:/c/cygwin64/etc/rancher/k3s/registries.yaml
+
+
+  service02:
+    image: "rancher/k3s:${K3S_VERSION:-latest}"
+    command:
+    - agent
+    tmpfs:
+    - /run
+    - /var/run
+    privileged: true
+    environment:
+    - K3S_URL=https://server:6443
+    - K3S_TOKEN=secret
+    - K3S_NODE_NAME=back
+    volumes:
+    - ./registries.yaml:/c/cygwin64/etc/rancher/k3s/registries.yaml
+
+  # jenkins01:
+  #     image: centos:7
+  #     container_name: jenkins01
+  #     ports:
+  #       - 8080:8080
+  #     restart: unless-stopped
+
+  # rancher01:
+  #     image: centos:7
+  #     container_name: rancher01
+  #     ports:
+  #       - 80:80
+  #       - 433:433
+  #     restart: unless-stopped
+
+
+  # code-server:
+  #     image: lscr.io/linuxserver/code-server:latest
+  #     container_name: code-server
+  #     environment:
+  #       - PUID=1000
+  #       - PGID=1000
+  #       - TZ=Europe/London
+  #       - PASSWORD=password #optional
+  #       - HASHED_PASSWORD= #optional
+  #       - SUDO_PASSWORD=password #optional
+  #       - SUDO_PASSWORD_HASH= #optional
+  #       # - PROXY_DOMAIN=code-server.my.domain #optional
+  #       - DEFAULT_WORKSPACE=/config/workspace #optional
+  #     # volumes:
+  #     #   - /path/to/appdata/config:/config
+  #     ports:
+  #       - 8888:8443
+  #     restart: unless-stopped
+
+
+
+
+  # jenkins:
+  #   image: jenkins/jenkins:lts
+  #   privileged: true
+  #   user: root
+  #   ports:
+  #   - 8080:8080
+  #   - 50000:50000
+  #   container_name: jenkins
+  #   volumes:
+  #   - /c/cygwin64/home/fajar/jenkins_compose/jenkins_configuration:/var/jenkins_home
+  #   - /c/cygwin64/var/run/docker.sock:/var/run/docker.sock
+  
+  # agentjenkins:
+  #   image: jenkins/ssh-agent:jdk11
+  #   privileged: true
+  #   user: root
+  #   container_name: agent
+  #   expose:
+  #     - 22
+  #   environment:
+  #     - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDS3CAzgDhtXj6pZoRX7nVNEHmPv0Hp0Z3jBnSqukbSgaD71R4E6W9WlTHxF3nqfuCs5vsQysJM0pMWiCPuInF1cXq+HLZtOUJZvIy1GW5tJL+eMNtOLq6nHqwFQ2FSOIKnnS1B6IKuWSN+TSZFuUe2WCOphMsmcgjQnCWGj1disjMgkSu2cHB8q9JoOu0d/vRGBmBpiB0YK8PFr0L23Z6AUEg8JNmT1BxxpgPrimUHwuSGK7w0JxZnMGLXXiqhqb8hOWZdfpIraWpQrnEWmlYLezkPDzNIKgDrJn/+LVZDPb6IQfNq4dgRWMU0YsAgdU+ey2HCL1hXbM1p9yH9AkxqhbHioGwO69hwSaKsWueo5ISDuu2sg8+hyFkDT+RRfFChVmW7haai3duIftNq5Om4QsXP0vrfhNH29nTHVsW1BjkCVT64oPei/4Io8/D2wAjosz73xnJoCGiPXVuuAKZbGDOGpDgd6qw/Pwoy36pNTzlXXQ/gholf3e7Fnz4KuiE= fajar@fajar_loyalto
+  

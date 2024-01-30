@@ -1,0 +1,45 @@
+version: '3.1'
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password-rahasia"
+      MYSQL_DATABASE: "DbDemo"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: "password-rahasia"
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb_data:
+
+# version: '3.1'
+
+# services:
+#   db:
+#     image: mariadb:10.6
+#     restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: notSecureChangeMe
+
+#   phpmyadmin:
+#     image: phpmyadmin
+#     restart: always
+#     ports:
+#       - 8080:80
+#     environment:
+#       - PMA_ARBITRARY=1

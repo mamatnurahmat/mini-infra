@@ -1,0 +1,56 @@
+version: '3.1'
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+
+services:
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8989:80"    
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: "password-rahasia"
+    #   MYSQL_DATABASE: "DbDummy"
+    networks:
+      my_network:
+        ipv4_address: 10.5.0.6
+    # volumes:
+    #   - mariadb_data:/var/lib/mysql
+
+  mariadb:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password-rahasia"
+      MYSQL_DATABASE: "DbDummy"
+    ports:
+      - "3306:3306"      
+    networks:
+      my_network:
+        ipv4_address: 10.5.0.3
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: "password-rahasia"
+    ports:
+      - "8080:80"      
+    networks:
+      my_network:
+        ipv4_address: 10.5.0.5
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb_data:
